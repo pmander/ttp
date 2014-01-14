@@ -1,4 +1,6 @@
 
+![Daring Fireball](http://daringfireball.net/graphics/logos/)
+
 
 GitHub Flavored Markdown
 ================================
