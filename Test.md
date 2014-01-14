@@ -163,3 +163,42 @@ I get 10 times more traffic from [Google] [1] than from
   [3]: http://search.msn.com/    "MSN Search"
 
 
+https://help.github.com/articles/github-flavored-markdown
+
+```erlang
+-module(strip_types).
+-export([parse_transform/2]).
+
+%% We need to strip the following:
+%% -export_type declarations:
+%%	{attribute,LINE,export_type,_}
+%% -type attributes:
+%%	{attribute,LINE,type,_}
+%% -opaque attributes:
+%%	{attribute,LINE,opaque,_}
+%% record field types:
+%%	stored separately from the record declaration, in a -type attribute
+%% -spec attributes:
+%%	{attribute,LINE,spec,_}
+%% -callback attributes:
+%%	{attribute,LINE,callback,_}
+-define(ATTRS_TO_STRIP, [export_type,type,opaque,spec,callback]).
+
+%% @private
+-spec parse_transform([erl_parse:abstract_form()], [compile:option()]) ->
+		[erl_parse:abstract_form()].
+parse_transform(Forms, _Options) ->
+    strip_types(Forms, []).
+
+strip_types([], Acc) ->
+    lists:reverse(Acc);
+strip_types([{attribute,_,Kind,_} = Attr | Rest], Acc) ->
+    case lists:member(Kind, ?ATTRS_TO_STRIP) of
+	true ->
+	    strip_types(Rest, Acc);
+	false ->
+	    strip_types(Rest, [Attr | Acc])
+    end;
+strip_types([Form | Rest], Acc) ->
+    strip_types(Rest, [Form | Acc]).
+```
